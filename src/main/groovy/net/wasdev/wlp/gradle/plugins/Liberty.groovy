@@ -34,6 +34,7 @@ import net.wasdev.wlp.gradle.plugins.tasks.InstallFeatureTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallLibertyTask
 import net.wasdev.wlp.gradle.plugins.tasks.UninstallFeatureTask
 import net.wasdev.wlp.gradle.plugins.tasks.extensions.arquillian.ConfigureArquillianTask
+import net.wasdev.wlp.gradle.plugins.tasks.extensions.thin.ThinTask
 import net.wasdev.wlp.gradle.plugins.tasks.CleanTask
 import net.wasdev.wlp.gradle.plugins.tasks.InstallAppsTask
 import net.wasdev.wlp.gradle.plugins.tasks.AbstractServerTask
@@ -223,6 +224,16 @@ class Liberty implements Plugin<Project> {
 				arquillianProperties = project.configureArquillian.arquillianProperties
 			}
 		}
+				
+		project.task('thin', type: ThinTask) {
+			description "Thinning of jar generated from spring boot gradle plugin."
+			logging.level = LogLevel.INFO
+			group 'Liberty'
+			project.afterEvaluate {
+				putLibCacheInDirectory = project.thin.putLibCacheInDirectory
+			}
+		}
+		
     }
 
     private void setEclipseFacets(Project project) {
