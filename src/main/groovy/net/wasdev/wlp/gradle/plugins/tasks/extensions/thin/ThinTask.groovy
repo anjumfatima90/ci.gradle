@@ -5,11 +5,13 @@ import java.io.IOException
 import java.security.NoSuchAlgorithmException
 import java.util.zip.ZipException
 
+import com.ibm.ws.app.manager.springboot.util.SpringBootThinUtil;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
+import org.gradle.api.Project
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.TaskAction;
-import net.wasdev.wlp.common.thin.plugin.util.ThinPluginUtility
+
 
 public class ThinTask extends DefaultTask{
 	
@@ -29,6 +31,9 @@ public class ThinTask extends DefaultTask{
 	 */
 	private String extension;
 	
+	@Input
+	private String archiveName
+	
     @TaskAction
     public void doExecute() throws GradleException {
 		try {
@@ -36,7 +41,7 @@ public class ThinTask extends DefaultTask{
 			setFinalNameAndExtension(sourceFatJar);
 			thin(sourceFatJar);
 		} catch (IOException | NoSuchAlgorithmException e) {
-			e.printStackTrace();
+			throw new GradleException(e);
 		}
     		
     }
@@ -52,7 +57,7 @@ public class ThinTask extends DefaultTask{
 		File libIndexCache = new File(project.getBuildDir(), libFile);
 		logger.info("Thinning " + extension + ": "+ targetThinJar.getAbsolutePath());
 		logger.info("Lib index cache: "+ libIndexCache.getAbsolutePath());
-		ThinPluginUtility thinUtil = new ThinPluginUtility(sourceFatJar, targetThinJar, libIndexCache,
+		SpringBootThinUtil thinUtil = new SpringBootThinUtil(sourceFatJar, targetThinJar, libIndexCache,
 			putLibCacheInDirectory);
 		thinUtil.execute();
 		
