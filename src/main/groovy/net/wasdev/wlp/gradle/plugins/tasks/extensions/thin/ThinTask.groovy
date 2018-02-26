@@ -12,75 +12,71 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.TaskAction;
 
+import org.gradle.api.plugins.*;
+
 
 public class ThinTask extends DefaultTask{
-	
-	/**
-	 * Library index cache as a Directory
-	 */
-	@Input
-	public boolean putLibCacheInDirectory = false;
-	
+
 	/*
 	 * Name of the generated archive.
 	 */
 	private String finalName;
-	
+
 	/*
 	 * Extension of the generated archive.
 	 */
 	private String extension;
-	
-	@Input
-	private String archiveName
-	
-    @TaskAction
-    public void doExecute() throws GradleException {
+
+
+	@TaskAction
+	public void doExecute() throws GradleException {
 		try {
-			File sourceFatJar = getTargetFile();
-			setFinalNameAndExtension(sourceFatJar);
-			thin(sourceFatJar);
+			File springAppFile = getTargetFile();
+			thin(springAppFile);
 		} catch (IOException | NoSuchAlgorithmException e) {
 			throw new GradleException(e);
 		}
-    		
-    }
+	}
 
-	private void thin(File sourceFatJar) throws ZipException, IOException, NoSuchAlgorithmException{
-		File targetThinJar = new File(project.getBuildDir(), "libs/thin-" + finalName + "." + extension);
-		String libFile = "libs/libIndexCache";
-		if(putLibCacheInDirectory) {
-			libFile += "-" + finalName;
-		} else {
-			libFile += "-" + finalName + ".zip";
-		}
+	private void thin(File springAppFile) throws ZipException, IOException, NoSuchAlgorithmException{
+		File thinSpringAppFile = new File(project.getBuildDir(), "libs/thin-" + finalName + "." + extension);
+		//String libFile = "libs/libIndexCache-" + finalName + ".zip";
+		String libFile = "libs/lib.index.cache.zip";
 		File libIndexCache = new File(project.getBuildDir(), libFile);
-		logger.info("Thinning " + extension + ": "+ targetThinJar.getAbsolutePath());
+		logger.info("Thinning " + extension + ": "+ thinSpringAppFile.getAbsolutePath());
 		logger.info("Lib index cache: "+ libIndexCache.getAbsolutePath());
-		SpringBootThinUtil thinUtil = new SpringBootThinUtil(sourceFatJar, targetThinJar, libIndexCache,
-			putLibCacheInDirectory);
+		SpringBootThinUtil thinUtil = new SpringBootThinUtil(springAppFile, thinSpringAppFile, libIndexCache, false);
 		thinUtil.execute();
-		
 	}
-	
+
 	private File getTargetFile() {
-		File sourceFatJar;
+		File springAppFile;
 		File buildLibsDir = new File(project.getBuildDir(), "libs");
-		File[] files = buildLibsDir.listFiles();	
-		for(File file: files) {
-			if (file.getName().startsWith(project.getName()) && !file.getName().endsWith(".original")) {
-				sourceFatJar = file;
-			}
+		extension = getPackagingType();
+		switch(extension) {
+			case "jar":
+				springAppFile= new File(buildLibsDir, project.jar.archiveName);
+				break;
+			case "war":
+				springAppFile= new File(buildLibsDir, project.war.archiveName);
+				break;
+			default:
+				break;
 		}
-		return sourceFatJar;
-	}
-	
-	
-	private void setFinalNameAndExtension(File sourceFatJar) {
-		int endIndex = sourceFatJar.getName().lastIndexOf('.');
-		this.finalName = sourceFatJar.getName().substring(0, endIndex);
-		this.extension = sourceFatJar.getName().substring(endIndex+1);
+		if(springAppFile.exists()) {
+			finalName = springAppFile.getName().substring(0, springAppFile.getName().lastIndexOf("."));
+		}
+		return springAppFile;
 	}
 
 
+	private String getPackagingType() throws Exception{
+		if (project.plugins.hasPlugin("org.springframework.boot") && project.getTasks().findByPath(":jar") != null) {
+			return "jar";
+		} else if (project.plugins.hasPlugin("org.springframework.boot") && project.getTasks().findByPath(":war") != null) {
+			return "war";
+		} else {
+			throw new GradleException("Archive path not found. Supported formats are jar and war.");
+		}
+	}
 }
