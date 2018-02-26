@@ -230,9 +230,6 @@ class Liberty implements Plugin<Project> {
 			logging.level = LogLevel.INFO
 			group 'Liberty'
 			dependsOn 'bootRepackage'
-			project.afterEvaluate {
-				putLibCacheInDirectory = project.thin.putLibCacheInDirectory
-			}
 		}
 		
     }
