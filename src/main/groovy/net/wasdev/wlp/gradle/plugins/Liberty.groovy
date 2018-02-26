@@ -229,6 +229,7 @@ class Liberty implements Plugin<Project> {
 			description "Thinning of jar generated from spring boot gradle plugin."
 			logging.level = LogLevel.INFO
 			group 'Liberty'
+			dependsOn 'bootRepackage'
 			project.afterEvaluate {
 				putLibCacheInDirectory = project.thin.putLibCacheInDirectory
 			}
