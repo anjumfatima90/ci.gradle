@@ -71,9 +71,9 @@ public class ThinTask extends DefaultTask{
 
 
 	private String getPackagingType() throws Exception{
-		if (project.plugins.hasPlugin("org.springframework.boot") && project.getTasks().findByPath(":jar") != null) {
+		if (project.plugins.hasPlugin("org.springframework.boot") && (project.getTasks().findByPath(":jar") != null || project.getTasks().findByPath(":" + project.getName() + ":jar") != null)) {
 			return "jar";
-		} else if (project.plugins.hasPlugin("org.springframework.boot") && project.getTasks().findByPath(":war") != null) {
+		} else if (project.plugins.hasPlugin("org.springframework.boot") && (project.getTasks().findByPath(":war") != null || project.getTasks().findByPath(":" + project.getName() + ":war") != null)) {
 			return "war";
 		} else {
 			throw new GradleException("Archive path not found. Supported formats are jar and war.");
