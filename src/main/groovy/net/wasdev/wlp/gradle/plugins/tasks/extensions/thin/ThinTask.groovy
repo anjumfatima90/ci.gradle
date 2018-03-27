@@ -5,7 +5,7 @@ import java.io.IOException
 import java.security.NoSuchAlgorithmException
 import java.util.zip.ZipException
 
-import com.ibm.ws.app.manager.springboot.util.SpringBootThinUtil;
+import net.wasdev.wlp.common.springboot.util.SpringBootThinUtil;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.Project
@@ -39,13 +39,11 @@ public class ThinTask extends DefaultTask{
 	}
 
 	private void thin(File springAppFile) throws ZipException, IOException, NoSuchAlgorithmException{
-		File thinSpringAppFile = new File(project.getBuildDir(), "libs/thin-" + finalName + "." + extension);
-		//String libFile = "libs/libIndexCache-" + finalName + ".zip";
-		String libFile = "libs/lib.index.cache.zip";
-		File libIndexCache = new File(project.getBuildDir(), libFile);
+		File thinSpringAppFile = new File(project.getBuildDir(), "libs/thin-" + finalName + "." + "spr");
+		File libIndexCache = new File(project.getBuildDir(), "libs/lib.index.cache");
 		logger.info("Thinning " + extension + ": "+ thinSpringAppFile.getAbsolutePath());
 		logger.info("Lib index cache: "+ libIndexCache.getAbsolutePath());
-		SpringBootThinUtil thinUtil = new SpringBootThinUtil(springAppFile, thinSpringAppFile, libIndexCache, false);
+		SpringBootThinUtil thinUtil = new SpringBootThinUtil(springAppFile, thinSpringAppFile, libIndexCache);
 		thinUtil.execute();
 	}
 
